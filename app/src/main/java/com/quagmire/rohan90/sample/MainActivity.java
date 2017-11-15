@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeApiCallWithCrawlerDump(CrawlerDump dump) {
-        Toast.makeText(this, "dump received "+dump.getType()+" "+dump.getData().size(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "dump received " + dump.getType() + " " + dump.getData().size(), Toast.LENGTH_SHORT).show();
         unregisterReceiver(crawlerBroadcastReceiver);
     }
 
@@ -77,14 +76,14 @@ public class MainActivity extends AppCompatActivity {
             if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
                 //denied
                 if (shouldShowRequestPermissionRationale(permissions[0])) {
-                    Log.i(Constants.APP_TAG,"not given read contacts permission");
+                    Log.i(Constants.APP_TAG, "not given read contacts permission");
                 } else {
                     //never ask again
-                    Log.i(Constants.APP_TAG,"never ask again read contacts permission");
+                    Log.i(Constants.APP_TAG, "never ask again read contacts permission");
                 }
             } else {
                 //user granted permission for contacts;
-                Log.i(Constants.APP_TAG,"user allowed read contacts permission");
+                Log.i(Constants.APP_TAG, "user allowed read contacts permission");
                 initQuagmire();// or call specific method again ie for now crawl all over again
             }
         }
