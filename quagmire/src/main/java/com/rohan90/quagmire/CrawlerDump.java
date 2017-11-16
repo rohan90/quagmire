@@ -26,6 +26,11 @@ public class CrawlerDump<T> implements Parcelable {
         this.className= className;
     }
 
+    public CrawlerDump(String type, List<T> data) {
+        this.type = type;
+        this.data = data;
+    }
+
     public String getType() {
         return type;
     }
@@ -69,4 +74,5 @@ public class CrawlerDump<T> implements Parcelable {
             return new CrawlerDump[size];
         }
     };
+
 }

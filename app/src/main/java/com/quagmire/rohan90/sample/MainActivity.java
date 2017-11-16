@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -16,6 +18,8 @@ import com.rohan90.quagmire.CrawlerBroadcastReceiver;
 import com.rohan90.quagmire.CrawlerConstants;
 import com.rohan90.quagmire.CrawlerDump;
 import com.rohan90.quagmire.RequestPermissionException;
+import com.rohan90.quagmire.utils.ContactsCrawledCallback;
+import com.rohan90.quagmire.utils.Logger;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,10 +40,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void initQuagmire() {
         crawler = Crawler.getInstance(this);
+        crawler.setLogging(true);
         try {
             registerCrawlerReceiver();
+            //if callback is null, an event is broadcasted on completion
+            crawler.setCallback(new ContactsCrawledCallback(){
+                @Override
+                public void onDataCrawled(CrawlerDump dump) {
+                    Logger.logInfo("received dump=["+dump.getType()+", "+dump.getData());
+                    makeApiCallWithCrawlerDump(dump);
+                }
+            });
             crawler.init();
-            crawler.setLogging(true);
         } catch (RequestPermissionException e) {
             e.printStackTrace();
             ActivityCompat.requestPermissions(this, new String[]{e.getPermissionString()}, REQUEST_CODE_PERMISSION_CONTACTS);
@@ -58,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
         };
-        registerReceiver(crawlerBroadcastReceiver, filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(crawlerBroadcastReceiver, filter);
     }
 
     private void makeApiCallWithCrawlerDump(CrawlerDump dump) {
-        Toast.makeText(this, "dump received " + dump.getType() + " " + dump.getData().size(), Toast.LENGTH_SHORT).show();
-        unregisterReceiver(crawlerBroadcastReceiver);
+        Toast.makeText(this, "dump received " + dump.getType(), Toast.LENGTH_SHORT).show();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(crawlerBroadcastReceiver);
     }
 
     @Override
@@ -73,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
         // TODO: 13/11/17 this could be made generic in a utils :p, but will address as this grows
         if (requestCode == REQUEST_CODE_PERMISSION_CONTACTS) {
             //this is for all denied situations
-            if (checkSelfPermission(permissions[0]) == PackageManager.PERMISSION_DENIED) {
+            if (ContextCompat.checkSelfPermission(this,permissions[0]) == PackageManager.PERMISSION_DENIED) {
                 //denied
-                if (shouldShowRequestPermissionRationale(permissions[0])) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,permissions[0])) {
                     Log.i(Constants.APP_TAG, "not given read contacts permission");
                 } else {
                     //never ask again

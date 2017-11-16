@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.ContactsContract;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.rohan90.quagmire.utils.Logger;
 
@@ -19,6 +20,7 @@ public class Crawler {
     private static Crawler instance = null;
     private Context context;
     private List<ContactsGist> contactsList;
+    private DataCrawledCallback callback;
 
     private Crawler(Context context) {
         this.context = context;
@@ -50,8 +52,8 @@ public class Crawler {
                 contactsList.add(new ContactsGist(name, phoneNumber));
             }
 
-            if(contactsList != null && !contactsList.isEmpty()){
-                sendBroadCastWithContactsDump(contactsList);
+            if (contactsList != null && !contactsList.isEmpty()) {
+                sendThroughAppropriateChannels(contactsList);
             }
         } catch (SecurityException e) {
             //dont have permission to read contacts, handle flow
@@ -65,15 +67,33 @@ public class Crawler {
         }
     }
 
+    private void sendThroughAppropriateChannels(List<ContactsGist> contactsList) {
+        if (callback != null) {
+            callback.onDataCrawled(new CrawlerDump(Constants.TYPE.Contacts, contactsList));
+        } else {
+            sendBroadCastWithContactsDump(contactsList);
+        }
+    }
+
+    /**
+     * notifies that contacts have been crawled.
+     * todo: this is for the contract when [I am done, now you may ask crawler to fetch contacts from db or in-memory]
+     * todo: next version to have builder and db pattern
+     * @param contactsList
+     */
     private void sendBroadCastWithContactsDump(List<ContactsGist> contactsList) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         intent.setAction(CrawlerConstants.ACTION.DUMP);
-        intent.putExtra(CrawlerConstants.BUNDLE.DUMP,new CrawlerDump(Constants.TYPE.Contacts,contactsList,ContactsGist.class.getCanonicalName()));
-        context.sendBroadcast(intent);
+        intent.putExtra(CrawlerConstants.BUNDLE.DUMP, new CrawlerDump(Constants.TYPE.Contacts, null, ContactsGist.class.getCanonicalName()));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     public void setLogging(boolean enabled) {
         Logger.setLogging(enabled);
+    }
+
+    public void setCallback(DataCrawledCallback callback) {
+        this.callback = callback;
     }
 }

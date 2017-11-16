@@ -48,4 +48,12 @@ public class ContactsGist implements Parcelable {
             return new ContactsGist[size];
         }
     };
+
+    @Override
+    public String toString() {
+        return "ContactsGist{" +
+                "name='" + name + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                '}';
+    }
 }
