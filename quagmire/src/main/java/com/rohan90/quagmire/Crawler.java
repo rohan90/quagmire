@@ -11,6 +11,7 @@ import com.rohan90.quagmire.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by rohan on 2/11/17.
@@ -55,6 +56,7 @@ public class Crawler {
             if (contactsList != null && !contactsList.isEmpty()) {
                 sendThroughAppropriateChannels(contactsList);
             }
+            cursor.close();
         } catch (SecurityException e) {
             //dont have permission to read contacts, handle flow
             Logger.logError(e.getMessage());
