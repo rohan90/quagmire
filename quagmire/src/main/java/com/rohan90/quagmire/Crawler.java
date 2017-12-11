@@ -66,6 +66,8 @@ public class Crawler {
             RequestPermissionException exception = new RequestPermissionException(new Exception("ask or implement permission for" + permsionString));
             exception.setPermissionString(permsionString);
             throw exception;
+        } catch (NullPointerException e){
+            // TODO: 11/12/17 Have to find out why curson is null sometimes, even though cursor.close is called. 
         }
     }
 
